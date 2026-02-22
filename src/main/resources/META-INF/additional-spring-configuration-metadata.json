@@ -1,0 +1,73 @@
+{
+  "properties": [
+    {
+      "name": "openbadges.base-url",
+      "type": "java.lang.String",
+      "description": "Base URL for public badge endpoints and JSON-LD identifiers. Used by all builders to construct canonical IRIs.",
+      "defaultValue": "http://localhost:8080"
+    },
+    {
+      "name": "openbadges.recipient-salt",
+      "type": "java.lang.String",
+      "description": "Salt appended to recipient email before SHA-256 hashing. Appears in IdentityObject.salt field.",
+      "defaultValue": "openbadges"
+    },
+    {
+      "name": "openbadges.issuer.name",
+      "type": "java.lang.String",
+      "description": "Default issuer display name used when auto-creating an issuer profile.",
+      "defaultValue": "My Organization"
+    },
+    {
+      "name": "openbadges.issuer.url",
+      "type": "java.lang.String",
+      "description": "Issuer homepage URL. Falls back to base-url if not set."
+    },
+    {
+      "name": "openbadges.issuer.email",
+      "type": "java.lang.String",
+      "description": "Issuer contact email address."
+    },
+    {
+      "name": "openbadges.issuer.description",
+      "type": "java.lang.String",
+      "description": "Issuer description text."
+    },
+    {
+      "name": "openbadges.signing.algorithm",
+      "type": "work.brodykim.signet.autoconfigure.OpenBadgesProperties$SigningAlgorithm",
+      "description": "Signing algorithm for credentials. Currently only ED25519 is supported.",
+      "defaultValue": "ED25519"
+    },
+    {
+      "name": "openbadges.signing.auto-generate-key",
+      "type": "java.lang.Boolean",
+      "description": "Hint for consuming application: whether to auto-generate an Ed25519 key pair on startup if none exists. The application is responsible for key lifecycle management.",
+      "defaultValue": true
+    },
+    {
+      "name": "openbadges.api.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Hint for consuming application: whether REST API badge endpoints should be registered. The starter does not auto-create endpoints.",
+      "defaultValue": true
+    },
+    {
+      "name": "openbadges.api.base-path",
+      "type": "java.lang.String",
+      "description": "Hint for consuming application: base path for REST API badge management endpoints.",
+      "defaultValue": "/api/v1"
+    },
+    {
+      "name": "openbadges.admin-ui.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Hint for consuming application: whether admin web UI for badge management should be registered.",
+      "defaultValue": true
+    },
+    {
+      "name": "openbadges.admin-ui.base-path",
+      "type": "java.lang.String",
+      "description": "Hint for consuming application: base path for admin web UI.",
+      "defaultValue": "/admin/badges"
+    }
+  ]
+}
