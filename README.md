@@ -22,7 +22,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.brody-0125:signet-spring-boot-starter:v0.1.2")
+    implementation("com.github.brody-0125:signet-spring-boot-starter:v0.1.3")
 }
 ```
 
@@ -35,7 +35,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.brody-0125:signet-spring-boot-starter:v0.1.2'
+    implementation 'com.github.brody-0125:signet-spring-boot-starter:v0.1.3'
 }
 ```
 
@@ -243,4 +243,4 @@ This starter implements:
 
 ## License
 
-Licensed under the [Apache License 2.0](../LICENSE).
+Licensed under the [Apache License 2.0](LICENSE).

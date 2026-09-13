@@ -1,3 +1,5 @@
+import java.util.zip.ZipFile
+
 plugins {
     `java-library`
     `maven-publish`
@@ -19,11 +21,39 @@ tasks.register("verifyReleaseVersion") {
         }
     }
 }
+tasks.register("verifyPublicationNotices") {
+    dependsOn("jar", "generatePomFileForMavenPublication")
+    doLast {
+        ZipFile(tasks.named<Jar>("jar").get().archiveFile.get().asFile).use { jar ->
+            for (name in listOf("LICENSE", "NOTICE")) {
+                val entry = checkNotNull(jar.getEntry("META-INF/$name")) { "Missing META-INF/$name" }
+                check(jar.getInputStream(entry).use { it.readBytes() }.contentEquals(file(name).readBytes()))
+            }
+        }
+        val pom = javax.xml.parsers.DocumentBuilderFactory.newInstance().newDocumentBuilder()
+            .parse(layout.buildDirectory.file("publications/maven/pom-default.xml").get().asFile)
+        val license = pom.getElementsByTagName("license")
+        check(license.length == 1 && license.item(0).textContent.contains("https://www.apache.org/licenses/LICENSE-2.0.txt")) {
+            "Published POM must declare Apache-2.0"
+        }
+    }
+}
+
+tasks.named("check") { dependsOn("verifyPublicationNotices") }
 
 publishing {
     publications {
         create<MavenPublication>("maven") {
             from(components["java"])
+            pom {
+                licenses {
+                    license {
+                        name.set("Apache License, Version 2.0")
+                        url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+                        distribution.set("repo")
+                    }
+                }
+            }
         }
     }
 }
@@ -44,7 +74,7 @@ dependencyManagement {
 
 dependencies {
     // Core library — transitively exposes all OB 3.0 classes to consumers
-    api("com.github.brody-0125:signet-core:v0.1.2")
+    api("com.github.brody-0125:signet-core:v0.1.3")
 
     // Jackson — needed for CredentialSigner bean creation in AutoConfiguration
     implementation("com.fasterxml.jackson.core:jackson-databind")
@@ -70,6 +100,10 @@ tasks.withType<JavaCompile> {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+tasks.named<Jar>("jar") {
+    from(files("LICENSE", "NOTICE")) { into("META-INF") }
 }
 
 // This is a library, not a bootable application
