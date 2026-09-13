@@ -6,7 +6,19 @@ plugins {
 }
 
 group = "work.brodykim"
-version = "0.1.0"
+version = providers.gradleProperty("version").get()
+
+tasks.register("verifyReleaseVersion") {
+    doLast {
+        val releaseVersion = providers.gradleProperty("releaseVersion").orNull
+        check(releaseVersion != null && releaseVersion.matches(Regex("(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)"))) {
+            "Release version must be MAJOR.MINOR.PATCH without leading zeroes"
+        }
+        check(releaseVersion == project.version.toString()) {
+            "Release tag version $releaseVersion does not match project version ${project.version}"
+        }
+    }
+}
 
 publishing {
     publications {
