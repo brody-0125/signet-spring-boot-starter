@@ -22,7 +22,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.brody-0125:signet-spring-boot-starter:v0.1.3")
+    implementation("com.github.brody-0125:signet-spring-boot-starter:v0.1.4")
 }
 ```
 
@@ -35,7 +35,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.brody-0125:signet-spring-boot-starter:v0.1.3'
+    implementation 'com.github.brody-0125:signet-spring-boot-starter:v0.1.4'
 }
 ```
 
