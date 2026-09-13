@@ -1,0 +1,40 @@
+name: Release
+on:
+  push:
+    tags:
+      - 'v[0-9]*'
+permissions:
+  contents: write
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Verify release version and build
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: sh ./gradlew verifyReleaseVersion build publishToMavenLocal -PreleaseVersion="${RELEASE_TAG#v}" --no-daemon
+      - name: Build and verify JitPack artifacts
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          base="https://jitpack.io/com/github/brody-0125/signet-spring-boot-starter/${RELEASE_TAG}/signet-spring-boot-starter-${RELEASE_TAG}"
+          curl --fail --location --retry 3 --retry-all-errors --retry-delay 15 --max-time 300 "$base.pom" -o /tmp/starter.pom
+          curl --fail --location --retry 3 --retry-all-errors --retry-delay 15 --max-time 300 "$base.jar" -o /tmp/starter.jar
+          jar tf /tmp/starter.jar > /tmp/starter-entries.txt
+          grep -q 'work/brodykim/signet/autoconfigure/OpenBadgesAutoConfiguration.class' /tmp/starter-entries.txt
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          if ! gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release create "$RELEASE_TAG" --verify-tag --title "$RELEASE_TAG" --generate-notes
+          fi

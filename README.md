@@ -22,7 +22,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.brody-0125:signet-spring-boot-starter:<commit>")
+    implementation("com.github.brody-0125:signet-spring-boot-starter:v0.1.0")
 }
 ```
 
@@ -35,15 +35,21 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.brody-0125:signet-spring-boot-starter:<commit>'
+    implementation 'com.github.brody-0125:signet-spring-boot-starter:v0.1.0'
 }
 ```
 
 > `signet-core` is included transitively via `api` configuration — no need to declare it separately.
 
-Replace `<commit>` with an immutable commit whose [JitPack build](https://jitpack.io/#brody-0125/signet-spring-boot-starter) has succeeded. Do not use a moving branch in production.
+Use a published semantic version from [Releases](https://github.com/brody-0125/signet-spring-boot-starter/releases). JitPack coordinates include the `v` prefix from the release tag.
 
 To verify publication locally with Java 17+, run `./gradlew build publishToMavenLocal`.
+
+### Releasing
+
+Set `version` in `gradle.properties` to `MAJOR.MINOR.PATCH` and merge the reviewed change. Tag that commit as `vMAJOR.MINOR.PATCH` and push the tag. The release workflow verifies the tag against the project version, runs tests, builds the Maven publication, requests the tagged JitPack POM/JAR, and publishes a GitHub release only after those checks succeed.
+
+Stable releases use semantic versioning: major for breaking changes, minor for compatible features, and patch for compatible fixes. Published tags must not be moved or reused. Commit-hash coordinates are reserved for unreleased development testing.
 
 ## Quick Start
 
