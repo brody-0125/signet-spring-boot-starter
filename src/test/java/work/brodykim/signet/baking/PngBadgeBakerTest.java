@@ -104,6 +104,40 @@ class PngBadgeBakerTest {
     // --- Extraction tests ---
 
     @Test
+    void bake_oversizedHeader_rejectsDimensionsBeforeDecodingPixels() {
+        properties.setMaxDimension(100);
+        // A valid signature and IHDR, with no pixel stream. Bounds must be checked before decoding.
+        byte[] header = java.util.Arrays.copyOf(TestImageGenerator.createMinimalPng(200, 200), 33);
+        BadgeBakingException failure = assertThrows(BadgeBakingException.class,
+            () -> baker.bake(header, TestImageGenerator.sampleDataIntegrityCredential()));
+        assertTrue(failure.getMessage().contains("exceed maximum"), failure.getMessage());
+    }
+
+    @Test
+    void imageCacheFiles_areClosedAfterSuccessAndFailure(@org.junit.jupiter.api.io.TempDir java.nio.file.Path cache) throws Exception {
+        byte[] png = TestImageGenerator.createMinimalPng(200, 200);
+        java.io.File previousDirectory = javax.imageio.ImageIO.getCacheDirectory();
+        boolean previousUseCache = javax.imageio.ImageIO.getUseCache();
+        try {
+            javax.imageio.ImageIO.setCacheDirectory(cache.toFile());
+            javax.imageio.ImageIO.setUseCache(true);
+            String credential = TestImageGenerator.sampleDataIntegrityCredential();
+            byte[] baked = baker.bake(png, credential);
+            assertEquals(credential, baker.extract(baked));
+            properties.setOverwriteExisting(false);
+            assertThrows(BadgeBakingException.class, () -> baker.bake(baked, credential));
+            byte[] invalid = java.util.Arrays.copyOf(png, 33);
+            assertThrows(BadgeBakingException.class, () -> baker.extract(invalid));
+            try (var entries = java.nio.file.Files.list(cache)) {
+                assertEquals(0, entries.count(), "ImageIO cache streams must close on success and exceptions");
+            }
+        } finally {
+            javax.imageio.ImageIO.setCacheDirectory(previousDirectory);
+            javax.imageio.ImageIO.setUseCache(previousUseCache);
+        }
+    }
+
+    @Test
     void extract_bakedPng_returnsCredentialString() throws BadgeBakingException {
         byte[] png = TestImageGenerator.createMinimalPng(200, 200);
         String credential = TestImageGenerator.sampleDataIntegrityCredential();

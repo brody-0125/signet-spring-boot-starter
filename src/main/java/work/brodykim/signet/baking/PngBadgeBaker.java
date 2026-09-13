@@ -11,6 +11,7 @@ import javax.imageio.ImageWriter;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.metadata.IIOMetadataNode;
 import javax.imageio.stream.ImageOutputStream;
+import javax.imageio.stream.ImageInputStream;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -45,15 +46,15 @@ public class PngBadgeBaker implements BadgeBaker {
         validatePng(imageData);
         validateSize(imageData);
 
+        ImageReader reader = ImageIO.getImageReadersByFormatName("png").next();
         try (ByteArrayInputStream bais = new ByteArrayInputStream(imageData);
+             ImageInputStream input = ImageIO.createImageInputStream(bais);
              ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
 
-            ImageReader reader = ImageIO.getImageReadersByFormatName("png").next();
-            reader.setInput(ImageIO.createImageInputStream(bais));
+            reader.setInput(input);
+            validateDimensions(reader.getWidth(0), reader.getHeight(0));
             BufferedImage image = reader.read(0);
             IIOMetadata metadata = reader.getImageMetadata(0);
-
-            validateDimensions(image);
 
             if (containsCredential(metadata) && !properties.isOverwriteExisting()) {
                 throw new BadgeBakingException(
@@ -78,12 +79,13 @@ public class PngBadgeBaker implements BadgeBaker {
             metadata.setFromTree(PNG_NATIVE_FORMAT, root);
 
             ImageWriter writer = ImageIO.getImageWritersByFormatName("png").next();
-            ImageOutputStream ios = ImageIO.createImageOutputStream(baos);
-            writer.setOutput(ios);
-            writer.write(new IIOImage(image, null, metadata));
-            ios.flush();
-            writer.dispose();
-            reader.dispose();
+            try (ImageOutputStream output = ImageIO.createImageOutputStream(baos)) {
+                writer.setOutput(output);
+                writer.write(new IIOImage(image, null, metadata));
+                output.flush();
+            } finally {
+                writer.dispose();
+            }
 
             return baos.toByteArray();
 
@@ -91,6 +93,8 @@ public class PngBadgeBaker implements BadgeBaker {
             throw e;
         } catch (Exception e) {
             throw new BadgeBakingException("Failed to bake PNG image", e);
+        } finally {
+            reader.dispose();
         }
     }
 
@@ -98,11 +102,11 @@ public class PngBadgeBaker implements BadgeBaker {
     public String extract(byte[] imageData) throws BadgeBakingException {
         validatePng(imageData);
 
-        try (ByteArrayInputStream bais = new ByteArrayInputStream(imageData)) {
-            ImageReader reader = ImageIO.getImageReadersByFormatName("png").next();
-            reader.setInput(ImageIO.createImageInputStream(bais));
+        ImageReader reader = ImageIO.getImageReadersByFormatName("png").next();
+        try (ByteArrayInputStream bais = new ByteArrayInputStream(imageData);
+             ImageInputStream input = ImageIO.createImageInputStream(bais)) {
+            reader.setInput(input);
             IIOMetadata metadata = reader.getImageMetadata(0);
-            reader.dispose();
 
             Node root = metadata.getAsTree(PNG_NATIVE_FORMAT);
             NodeList children = root.getChildNodes();
@@ -128,6 +132,8 @@ public class PngBadgeBaker implements BadgeBaker {
 
         } catch (Exception e) {
             throw new BadgeBakingException("Failed to extract credential from PNG", e);
+        } finally {
+            reader.dispose();
         }
     }
 
@@ -149,9 +155,7 @@ public class PngBadgeBaker implements BadgeBaker {
         }
     }
 
-    private void validateDimensions(BufferedImage image) throws BadgeBakingException {
-        int w = image.getWidth();
-        int h = image.getHeight();
+    private void validateDimensions(int w, int h) throws BadgeBakingException {
         int min = properties.getMinDimension();
         int max = properties.getMaxDimension();
         if (w < min || h < min) {
