@@ -16,20 +16,34 @@ This starter builds on [signet-core](../signet-core) and adds:
 ### Gradle (Kotlin DSL)
 
 ```kotlin
+repositories {
+    mavenCentral()
+    maven { url = uri("https://jitpack.io") }
+}
+
 dependencies {
-    implementation("work.brodykim:signet-spring-boot-starter:0.1.0")
+    implementation("com.github.brody-0125:signet-spring-boot-starter:<commit>")
 }
 ```
 
 ### Gradle (Groovy DSL)
 
 ```groovy
+repositories {
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+}
+
 dependencies {
-    implementation 'work.brodykim:signet-spring-boot-starter:0.1.0'
+    implementation 'com.github.brody-0125:signet-spring-boot-starter:<commit>'
 }
 ```
 
 > `signet-core` is included transitively via `api` configuration — no need to declare it separately.
+
+Replace `<commit>` with an immutable commit whose [JitPack build](https://jitpack.io/#brody-0125/signet-spring-boot-starter) has succeeded. Do not use a moving branch in production.
+
+To verify publication locally with Java 17+, run `./gradlew build publishToMavenLocal`.
 
 ## Quick Start
 

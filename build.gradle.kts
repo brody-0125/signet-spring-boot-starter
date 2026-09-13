@@ -1,11 +1,20 @@
 plugins {
     `java-library`
+    `maven-publish`
     id("org.springframework.boot") version "3.5.11" apply false
     id("io.spring.dependency-management") version "1.1.7"
 }
 
 group = "work.brodykim"
 version = "0.1.0"
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
+        }
+    }
+}
 
 repositories {
     mavenCentral()
