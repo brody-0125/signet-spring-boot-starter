@@ -22,7 +22,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.brody-0125:signet-spring-boot-starter:v0.1.4")
+    implementation("com.github.brody-0125:signet-spring-boot-starter:v0.1.5")
 }
 ```
 
@@ -35,11 +35,13 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.brody-0125:signet-spring-boot-starter:v0.1.4'
+    implementation 'com.github.brody-0125:signet-spring-boot-starter:v0.1.5'
 }
 ```
 
 > `signet-core` is included transitively via `api` configuration — no need to declare it separately.
+
+Version 0.1.5 includes Core 0.1.4, which adds the official Open Badges extension context to newly built credentials. Schema-validator, revocation-list and refresh-service types are therefore defined in their signed RDF. Existing signed credentials are not modified; adding a context requires signing a new credential.
 
 Use a published semantic version from [Releases](https://github.com/brody-0125/signet-spring-boot-starter/releases). JitPack coordinates include the `v` prefix from the release tag.
 
