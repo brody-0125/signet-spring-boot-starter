@@ -74,7 +74,7 @@ dependencyManagement {
 
 dependencies {
     // Core library — transitively exposes all OB 3.0 classes to consumers
-    api("com.github.brody-0125:signet-core:v0.1.4")
+    api("com.github.brody-0125:signet-core:v0.1.5")
 
     // Jackson — needed for CredentialSigner bean creation in AutoConfiguration
     implementation("com.fasterxml.jackson.core:jackson-databind")
